@@ -2,7 +2,6 @@ package gen
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -83,12 +82,10 @@ func (g *Gpa) processFile(fp string) string {
 			fun.FileName = fp
 			s, err := g.gen.Generate(fun)
 			if err != nil {
-				println(err.Error())
+				common.Error(err.Error())
 			} else {
-				println(s)
+				common.Info(s)
 			}
-			marshal, _ := json.Marshal(fun)
-			println(string(marshal))
 		}
 	}
 	return ""
@@ -121,7 +118,7 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
 func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 
 	fields := []*common.Field{}
-	typ := strings.TrimSpace(string(data[field.Type.Pos()-1: field.Type.End()-1]))
+	typ := strings.TrimSpace(string(data[field.Type.Pos()-1 : field.Type.End()-1]))
 	isPointer := false
 	isSlice := false
 	if strings.HasPrefix(typ, "*") {

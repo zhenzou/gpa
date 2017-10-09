@@ -163,7 +163,7 @@ func TestGpaParser_extractPredicate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := &GpaParser{}
-			gotPredicates, err := g.extractPredicate(tt.args.str)
+			gotPredicates, _, err := g.extractPredicate(tt.args.str)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GpaParser.extractPredicate() error = %v, wantErr %v", err, tt.wantErr)
 				return

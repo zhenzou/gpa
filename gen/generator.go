@@ -28,6 +28,7 @@ func (g *Generator) Generate(f *common.Func) (code string, err error) {
 	} else if f, err := g.parser.ParseFind(f); err == nil {
 		code = g.trans.TransformFind(f)
 	} else {
+		common.Warn(err.Error())
 		err = errors.New("not a legal gpa func ")
 	}
 	return

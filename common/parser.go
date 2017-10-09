@@ -124,7 +124,6 @@ func (g *GpaParser) extractPredicate(str string) (predicates []*Predicate, param
 			}
 			field = title
 			hasField = true
-			Debug(title)
 			str = strings.TrimPrefix(str, title)
 		} else {
 			var prefix string
@@ -143,7 +142,6 @@ func (g *GpaParser) extractPredicate(str string) (predicates []*Predicate, param
 				if prefix, err = g.extractTitle(str); err != nil {
 					return
 				}
-				Debug(prefix)
 				field += prefix
 			}
 			str = strings.TrimPrefix(str, prefix)

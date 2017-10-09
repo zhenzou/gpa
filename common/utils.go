@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"fmt"
+	"bytes"
 )
 
 //func visitFile(path string, f os.FileInfo, err error) error {
@@ -52,6 +53,12 @@ func AssertIn(strs []string, s string) {
 	}
 }
 
+func AssertPrefix(str string, prefix string) {
+	if !strings.HasPrefix(str, prefix) {
+		panic(fmt.Sprintf("%s must start with %s", str, prefix))
+	}
+}
+
 func Concat(strings ...[]string) []string {
 	ss := []string{}
 	for _, str := range strings {
@@ -68,4 +75,20 @@ func AnyPrefix(s string, prefixs []string) (prefix string, ok bool) {
 		}
 	}
 	return
+}
+
+// TestModel->test_model
+func TableName(model string) string {
+	return toSnake(model)
+}
+
+func toSnake(s string) string {
+	buf := bytes.NewBufferString("")
+	for i, v := range s {
+		if i > 0 && v >= 'A' && v <= 'Z' {
+			buf.WriteRune('_')
+		}
+		buf.WriteRune(v)
+	}
+	return strings.ToLower(buf.String())
 }
