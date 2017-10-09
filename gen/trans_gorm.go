@@ -1,9 +1,10 @@
 package gen
 
 import (
-	"gpa/common"
-	"fmt"
 	"bytes"
+	"fmt"
+
+	"gpa/common"
 )
 
 const (

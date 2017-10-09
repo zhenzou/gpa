@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"gpa/log"
 )
 
 const (
@@ -84,7 +85,7 @@ func (g *GpaParser) ParseDelete(fd *Func) (delete *Delete, err error) {
 		return
 	}
 	if fullName == "" {
-		Warnf("delete without predicate in %s:%s", fd.FileName, fd.FullName)
+		log.Warnf("delete without predicate in %s:%s", fd.FileName, fd.FullName)
 	} else {
 		if strings.HasPrefix(fullName, By) {
 			fn := strings.TrimPrefix(fullName, By)
@@ -180,7 +181,7 @@ func (g *GpaParser) ParseUpdate(fd *Func) (update *Update, err error) {
 		return
 	}
 	if fullName == "" {
-		Warnf("update without predicate in %s:%s", fd.FileName, fd.FullName)
+		log.Warnf("update without predicate in %s:%s", fd.FileName, fd.FullName)
 	} else {
 		if strings.HasPrefix(fullName, By) {
 			fn := strings.TrimPrefix(fullName, By)
