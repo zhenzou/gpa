@@ -94,7 +94,7 @@ func (g *GpaParser) ParseDelete(fd *Func) (delete *Delete, err error) {
 			if len(fd.Params) < paramCount {
 				err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 			}
-			delete = &Delete{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates}
+			delete = &Delete{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
 		} else {
 			err = errors.New(fullName + " should start with By")
 		}
@@ -189,7 +189,7 @@ func (g *GpaParser) ParseUpdate(fd *Func) (update *Update, err error) {
 			if len(fd.Params) < paramCount+1 {
 				err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 			}
-			update = &Update{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates}
+			update = &Update{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
 		} else {
 			err = errors.New(fullName + " should start with By")
 		}
@@ -217,7 +217,7 @@ func (g *GpaParser) ParseFind(fd *Func) (find *Find, err error) {
 		if len(fd.Params) < paramCount {
 			err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 		}
-		find = &Find{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates}
+		find = &Find{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
 	} else {
 		err = errors.New(fullName + " should start with By")
 	}

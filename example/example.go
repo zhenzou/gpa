@@ -38,3 +38,7 @@ func (m *Model) deleteByIdAndLastName(id, lastName string) (err error) {
 func (m *Model) findByLastName(lastName string, limit int, offset int) (models []*Model, err error) {
 
 }
+
+func (m *Model) findByAgeBetween(min, max, limit, offset int) (models []*Model, err error) {
+
+}

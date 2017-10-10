@@ -145,16 +145,17 @@ var (
 
 func (g *GormTransformer) TransformFind(find *common.Find) string {
 	tb := common.TableName(find.Table)
-	where := g.transformPredicates(find.Predicates, find.Func.Params)
+	end := len(find.Func.Params)
 	var page string
-	if len(find.Func.Params)-len(find.Predicates) == 2 {
+	if len(find.Func.Params)-find.ParamCount == 2 {
 		if g.checkPage(find.Func.Params) {
 			page = PageTemplate
+			end = end - 2
 		}
 	}
+	where := g.transformPredicates(find.Predicates, find.Func.Params[:end])
 	name, decls := g.transformResult(find.Func.Receiver.Typ, find.Func.Results)
 	expr := fmt.Sprintf(FindTemplate, GetDb, tb, page, name, where)
-
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, fmt.Sprintf(ReturnModel, name))
 }
 

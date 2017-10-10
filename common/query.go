@@ -10,6 +10,7 @@ type Create struct {
 type Update struct {
 	Func       *Func
 	Table      string
+	ParamCount int
 	Predicates []*Predicate
 }
 
@@ -17,14 +18,15 @@ type Find struct {
 	Func       *Func
 	Table      string
 	Predicates []*Predicate
-
-	GroupBy string
-	SortBy  Sort
+	ParamCount int
+	GroupBy    string
+	SortBy     Sort
 }
 
 type Delete struct {
 	Func       *Func
 	Table      string
+	ParamCount int
 	Predicates []*Predicate
 }
 
