@@ -6,19 +6,19 @@ type Model struct {
 	LastName string
 }
 
-func (m *Model) findById() (model *Model) {
+func (m *Model) findById(id string) (model *Model) {
 
 }
 
-func (m *Model) findByName() (models []*Model) {
+func (m *Model) findByName(name string) (models []*Model) {
 
 }
 
-func (m *Model) findByNameAndLastname() (models []*Model) {
+func (m *Model) findByNameAndLastname(name, lastName string) (models []*Model) {
 
 }
 
-func (m *Model) deleteByName() (*Model) {
+func (m *Model) deleteByName(name string) (*Model) {
 
 }
 

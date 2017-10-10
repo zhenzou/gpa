@@ -3,7 +3,7 @@ package gen
 import (
 	"errors"
 
-	"gpa/common"
+	"github.com/zhenzou/gpa/common"
 )
 
 func NewGenerator(trans Transformer, parser common.Parser) *Generator {

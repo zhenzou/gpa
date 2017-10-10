@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
-	"gpa/log"
+
+	"github.com/zhenzou/gpa/log"
 )
 
 const (
@@ -47,6 +48,7 @@ type Parser interface {
 	ParseFind(fd *Func) (*Find, error)
 }
 
+//TODO 类型检查，参数检查
 type GpaParser struct {
 }
 

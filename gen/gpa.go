@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"gpa/common"
-	"gpa/log"
+	"github.com/zhenzou/gpa/common"
+	"github.com/zhenzou/gpa/log"
 )
 
 var (
@@ -37,6 +37,7 @@ func NewGpa(gen *Generator, handler PostHandler) *Gpa {
 }
 
 func DebugHandler(fp, origin, result string) error {
+	fmt.Println()
 	fmt.Println(fp + ":")
 	fmt.Println(result)
 	return nil
@@ -76,8 +77,9 @@ func (g *Gpa) processFile(fp string) string {
 	if err != nil {
 		panic(err)
 	}
-	decls := file.Decls
-	for _, decl := range decls {
+	buf := common.NewOutputBuffer(data)
+	var off int
+	for _, decl := range file.Decls {
 		if fd, ok := decl.(*ast.FuncDecl); ok && len(fd.Body.List) == 0 {
 			fun := g.extractFunc(data, fd)
 			fun.FileName = fp
@@ -85,10 +87,13 @@ func (g *Gpa) processFile(fp string) string {
 			if err != nil {
 				log.Error(err.Error())
 			} else {
-				log.Info(s)
+				s = "\n" + s
+				buf.WriteStringAt(s, off+int(fd.Body.Lbrace))
+				off += len(s)
 			}
 		}
 	}
+	g.handler(fp, string(data), buf.String())
 	return ""
 }
 
@@ -129,7 +134,6 @@ func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 	//TODO
 	if strings.HasPrefix(typ, "[") {
 		isSlice = true
-		//strings.Trim
 	}
 	if len(field.Names) > 0 {
 		for _, name := range field.Names {

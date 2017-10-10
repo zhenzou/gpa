@@ -4,8 +4,9 @@ import (
 	"flag"
 	"go/parser"
 	"go/token"
-	"gpa/gen"
-	"gpa/common"
+
+	"github.com/zhenzou/gpa/common"
+	"github.com/zhenzou/gpa/gen"
 )
 
 var (
@@ -21,7 +22,6 @@ func init() {
 }
 
 func main() {
-
 	gpa := gen.NewDebugGpa(gen.NewGenerator(&gen.GormTransformer{}, &common.GpaParser{}))
-	gpa.Process("/media/Media/Projects/Go/GOPATH/src/gpa/example/example.go")
+	gpa.Process("/media/Media/Projects/Go/GOPATH/src/github.com/zhenzou/gpa/example/example.go")
 }

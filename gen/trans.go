@@ -1,6 +1,6 @@
 package gen
 
-import "gpa/common"
+import "github.com/zhenzou/gpa/common"
 
 type Transformer interface {
 	TransformCreate(create *common.Create) string

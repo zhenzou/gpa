@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"gpa/common"
+	"github.com/zhenzou/gpa/common"
 )
 
 const (
