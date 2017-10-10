@@ -149,7 +149,6 @@ func (g *GpaParser) extractPredicate(str string) (predicates []*Predicate, param
 			}
 			str = strings.TrimPrefix(str, prefix)
 		}
-		//Debug(str)
 	}
 	return
 }

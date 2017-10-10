@@ -23,6 +23,11 @@ func Debug(args ...interface{}) {
 	log.Println(p+" [D]", args)
 }
 
+func Debugf(format string, args ...interface{}) {
+	p := prefix()
+	log.Println(p+" [D]", fmt.Sprintf(format, args))
+}
+
 func Info(args ...interface{}) {
 	p := prefix()
 	log.Println(p+" [I]", args)
@@ -31,11 +36,6 @@ func Info(args ...interface{}) {
 func Infof(format string, args ...interface{}) {
 	p := prefix()
 	log.Println(p+" [I]", fmt.Sprintf(format, args))
-}
-
-func Debugf(format string, args ...interface{}) {
-	p := prefix()
-	log.Println(p+" [D]", fmt.Sprintf(format, args))
 }
 
 func Warn(args ...interface{}) {

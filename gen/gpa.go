@@ -44,9 +44,7 @@ func DebugHandler(fp, origin, result string) error {
 }
 
 func RewriteHandler(fp, origin, result string) error {
-	fmt.Println(fp + ":")
-	fmt.Println(result)
-	return nil
+	return ioutil.WriteFile(fp, []byte(result), os.ModePerm)
 }
 
 type Gpa struct {
@@ -93,7 +91,9 @@ func (g *Gpa) processFile(fp string) string {
 			}
 		}
 	}
-	g.handler(fp, string(data), buf.String())
+	if err = g.handler(fp, string(data), buf.String()); err != nil {
+		log.Error(err.Error())
+	}
 	return ""
 }
 
