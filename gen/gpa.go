@@ -121,24 +121,37 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
 	return f
 }
 
+// NOTE 一些错误没有处理
+// 假设，方法除了没有方法体以外，没有其他语法错误
 func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 
 	fields := []*common.Field{}
 	typ := strings.TrimSpace(string(data[field.Type.Pos()-1: field.Type.End()-1]))
 	isPointer := false
 	isSlice := false
-	if strings.HasPrefix(typ, "*") {
-		isPointer = true
-		typ = strings.TrimPrefix(typ, "*")
-	}
-	//TODO
+
+	// NOTE 暂时不支持 *[]*Type这种
+	// TODO Array，暂时只支持slice吧，反正Array用的少
 	if strings.HasPrefix(typ, "[") {
 		isSlice = true
+		buf := bytes.NewBuffer(nil)
+		for _, r := range typ {
+			buf.WriteRune(r)
+			if r == ']' {
+				break
+			}
+		}
+		typ = strings.TrimPrefix(typ, buf.String())
+	}
+
+	if strings.HasPrefix(typ, "*") {
+		isPointer = true
+		typ = strings.TrimSpace(strings.TrimPrefix(typ, "*"))
 	}
 	if len(field.Names) > 0 {
 		for _, name := range field.Names {
 			fields = append(fields, &common.Field{
-				Typ:       common.Type{IsPointer: isPointer, Typ: typ},
+				Typ:       common.Type{IsPointer: isPointer, TypeName: typ},
 				IsPointer: isPointer,
 				IsSlice:   isSlice,
 				Name:      strings.TrimSpace(name.Name),
@@ -146,11 +159,10 @@ func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 		}
 	} else {
 		fields = append(fields, &common.Field{
-			Typ:       common.Type{IsPointer: isPointer, Typ: typ},
+			Typ:       common.Type{IsPointer: isPointer, TypeName: typ},
 			IsPointer: isPointer,
-			Name:      "",
+			IsSlice:   isSlice,
 		})
 	}
-
 	return fields
 }

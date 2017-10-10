@@ -49,26 +49,26 @@ var (
 	func1 = &Func{
 		FileName: "parser_test.go",
 		FullName: "DeleteById",
-		Params:   []*Field{{Name: "id", IsPointer: false, Typ: Type{Typ: "string", IsPointer: false}}},
-		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{Typ: "Model", IsPointer: true}}},
-		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{Typ: "Model", IsPointer: true}},
+		Params:   []*Field{{Name: "id", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}}},
+		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
+		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}},
 	}
 	func2 = &Func{
 		FileName: "parser_test.go",
 		FullName: "DeleteByName",
-		Params:   []*Field{{Name: "name", IsPointer: false, Typ: Type{Typ: "string", IsPointer: false}}},
-		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{Typ: "Model", IsPointer: true}}},
-		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{Typ: "Model", IsPointer: true}},
+		Params:   []*Field{{Name: "name", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}}},
+		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
+		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}},
 	}
 	func3 = &Func{
 		FileName: "parser_test.go",
 		FullName: "DeleteByNameAndLastName",
 		Params: []*Field{
-			{Name: "name", IsPointer: false, Typ: Type{Typ: "string", IsPointer: false}},
-			{Name: "lastName", IsPointer: false, Typ: Type{Typ: "string", IsPointer: false}},
+			{Name: "name", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}},
+			{Name: "lastName", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}},
 		},
-		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{Typ: "Model", IsPointer: true}}},
-		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{Typ: "Model", IsPointer: true}},
+		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
+		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}},
 	}
 
 	predicates1 = []*Predicate{

@@ -29,7 +29,7 @@ type Field struct {
 }
 
 type Type struct {
-	Typ       string
+	TypeName  string
 	IsPointer bool
 }
 
@@ -67,16 +67,12 @@ func (g *GpaParser) trimPrefix(fullName, prefix string) (string, error) {
 // NOTE 暂时只支持使用Receiver作为Table的这种格式吧
 // 参考：example
 func (g *GpaParser) ParseCreate(fd *Func) (create *Create, err error) {
-	var name string
 	create = &Create{Func: fd}
-	if name, err = g.trimPrefix(fd.FullName, CreatePrefix); err != nil {
+	if _, err = g.trimPrefix(fd.FullName, CreatePrefix); err != nil {
 		return
 	}
 	if fd.Receiver == nil {
 		err = errors.New(fd.FullName + " must have a receiver")
-	}
-	if name != "" {
-		create.Table = name
 	}
 	return
 }
@@ -98,7 +94,7 @@ func (g *GpaParser) ParseDelete(fd *Func) (delete *Delete, err error) {
 			if len(fd.Params) < paramCount {
 				err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 			}
-			delete = &Delete{Func: fd, Table: fd.Receiver.Typ.Typ, Predicates: predicates}
+			delete = &Delete{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates}
 		} else {
 			err = errors.New(fullName + " should start with By")
 		}
@@ -193,7 +189,7 @@ func (g *GpaParser) ParseUpdate(fd *Func) (update *Update, err error) {
 			if len(fd.Params) < paramCount+1 {
 				err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 			}
-			update = &Update{Func: fd, Table: fd.Receiver.Typ.Typ, Predicates: predicates}
+			update = &Update{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates}
 		} else {
 			err = errors.New(fullName + " should start with By")
 		}
@@ -208,6 +204,10 @@ func (g *GpaParser) ParseFind(fd *Func) (find *Find, err error) {
 	if fullName, err = g.trimPrefix(fd.FullName, FindPrefix); err != nil {
 		return
 	}
+	if fullName == "" || fullName == "All" {
+		find = &Find{Func: fd, Table: fd.Receiver.Typ.TypeName}
+		return
+	}
 	if strings.HasPrefix(fullName, By) {
 		fn := strings.TrimPrefix(fullName, By)
 		predicates, paramCount, err := g.extractPredicate(fn)
@@ -217,7 +217,7 @@ func (g *GpaParser) ParseFind(fd *Func) (find *Find, err error) {
 		if len(fd.Params) < paramCount {
 			err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 		}
-		find = &Find{Func: fd, Table: fd.Receiver.Typ.Typ, Predicates: predicates}
+		find = &Find{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates}
 	} else {
 		err = errors.New(fullName + " should start with By")
 	}

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"fmt"
 	"bytes"
+	"unicode"
+	"math"
 )
 
 //func visitFile(path string, f os.FileInfo, err error) error {
@@ -91,4 +93,36 @@ func toSnake(s string) string {
 		buf.WriteRune(v)
 	}
 	return strings.ToLower(buf.String())
+}
+
+func MapIndexed(s string, f func(int, rune) bool) string {
+	for i, r := range s {
+		if !f(i, r) {
+			break
+		}
+	}
+	return s
+}
+
+// 如果以大写开头，则将首字母改为小写，如果以小写字幕开头则取前三个字幕
+// TypeName->typeName
+// error->err
+func VarName(typeName string, plural bool) string {
+	bs := make([]byte, 0, len(typeName))
+	buf := bytes.NewBuffer(bs)
+	for i, r := range typeName {
+		if i == 0 {
+			if unicode.IsLower(r) {
+				buf.Write([]byte(typeName[:int(math.Min(float64(len(typeName)), 3))]))
+				break
+			}
+			buf.WriteRune(unicode.ToLower(r))
+		} else {
+			buf.WriteRune(r)
+		}
+	}
+	if plural {
+		buf.WriteRune('s')
+	}
+	return buf.String()
 }

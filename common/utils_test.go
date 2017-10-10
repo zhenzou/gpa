@@ -23,3 +23,28 @@ func TestTableName(t *testing.T) {
 		})
 	}
 }
+
+func TestVarName(t *testing.T) {
+	type args struct {
+		typeName string
+		plural   bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"VarName1", args{"TypeName", false}, "typeName"},
+		{"VarName1", args{"TypeName", true}, "typeNames"},
+		{"VarName1", args{"typeName", false}, "typ"},
+		{"VarName1", args{"error", false}, "err"},
+		{"VarName1", args{"er", false}, "er"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := VarName(tt.args.typeName, tt.args.plural); got != tt.want {
+				t.Errorf("VarName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
