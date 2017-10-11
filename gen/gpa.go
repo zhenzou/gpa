@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/zhenzou/gpa/common"
@@ -59,14 +60,26 @@ func (g *Gpa) Process(fp string) {
 	if err != nil {
 		panic(err)
 	}
-	if common.IsGoFile(file) {
+	if file.IsDir() {
+		filepath.Walk(fp, g.visitFile)
+	} else if common.IsGoFile(file) {
 		g.processFile(fp)
 	} else {
-		fmt.Println("dir not support now")
+		fmt.Println("need a go file")
 	}
 }
 
-func (g *Gpa) processFile(fp string) string {
+func (g *Gpa) visitFile(path string, f os.FileInfo, err error) error {
+	if err == nil && common.IsGoFile(f) {
+		err = g.processFile(path)
+	}
+	if err != nil && !os.IsNotExist(err) {
+		panic(err)
+	}
+	return err
+}
+
+func (g *Gpa) processFile(fp string) error {
 	data, err := ioutil.ReadFile(fp)
 	if err != nil {
 		panic(err)
@@ -94,7 +107,7 @@ func (g *Gpa) processFile(fp string) string {
 	if err = g.handler(fp, string(data), buf.String()); err != nil {
 		log.Error(err.Error())
 	}
-	return ""
+	return err
 }
 
 func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
@@ -126,7 +139,7 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
 func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 
 	fields := []*common.Field{}
-	typ := strings.TrimSpace(string(data[field.Type.Pos()-1: field.Type.End()-1]))
+	typ := strings.TrimSpace(string(data[field.Type.Pos()-1 : field.Type.End()-1]))
 	isPointer := false
 	isSlice := false
 
