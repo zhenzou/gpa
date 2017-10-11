@@ -35,8 +35,13 @@ type Sort struct {
 	Desc  bool
 }
 
+type OpInfo struct {
+	OpCode     int
+	ParamCount int
+}
+
 const (
-	OpBetween          = iota + 1
+	OpBetween = iota + 1
 	OpNotNull
 	OpNull
 	OpLessThan
@@ -88,12 +93,65 @@ var (
 	opNot              = []string{"IsNot", "Not"}
 	opEqual            = []string{"Is", "Equals"} //默认
 
+	opBetweenInfo          = &OpInfo{OpBetween, 2}
+	opNotNullInfo          = &OpInfo{OpNotNull, 0}
+	opNullInfo             = &OpInfo{OpNull, 0}
+	opLessThanInfo         = &OpInfo{OpLessThan, 1}
+	opLessThanEqualInfo    = &OpInfo{OpLessThanEqual, 1}
+	opGreaterThanInfo      = &OpInfo{OpGreaterThan, 1}
+	opGreaterThanEqualInfo = &OpInfo{OpGreaterThanEqual, 1}
+	opBeforeInfo           = &OpInfo{OpBefore, 1}
+	opAfterInfo            = &OpInfo{OpAfter, 1}
+	opLikeInfo             = &OpInfo{OpLike, 1}
+	opNotLikeInfo          = &OpInfo{OpNotLike, 1}
+	opStartWithInfo        = &OpInfo{OpStartWith, 1}
+	opEndWithInfo          = &OpInfo{OpEndWith, 1}
+	opNotEmptyInfo         = &OpInfo{OpNotEmpty, 0}
+	opEmptyInfo            = &OpInfo{OpEmpty, 0}
+	opContainInfo          = &OpInfo{OpContain, 1}
+	opNotInInfo            = &OpInfo{OpNotIn, 1}
+	opInInfo               = &OpInfo{OpIn, 1}
+	opRegexInfo            = &OpInfo{OpRegex, 1}
+	opExistsInfo           = &OpInfo{OpExists, 0}
+	opTrueInfo             = &OpInfo{OpTrue, 0}
+	opFalseInfo            = &OpInfo{OpFalse, 0}
+	opNotInfo              = &OpInfo{OpNot, 1}
+	opEqualInfo            = &OpInfo{OpEqual, 1}
+
+	OpCodeMap = map[string]*OpInfo{
+		"IsBetween": opBetweenInfo, "Between": opBetweenInfo,
+		"IsNotNull": opNotNullInfo, "NotNull": opNotNullInfo,
+		"IsNull": opNullInfo, "Null": opNullInfo,
+		"IsLessThan": opLessThanInfo, "LessThan": opLessThanInfo, "LT": opLessThanInfo,
+		"IsLessThanEqual": opLessThanEqualInfo, "LessThanEqual": opLessThanEqualInfo, "LE": opLessThanEqualInfo,
+		"IsGreaterThan": opGreaterThanInfo, "GreaterThan": opGreaterThanInfo, "GT": opGreaterThanInfo,
+		"IsGreaterThanEqual": opGreaterThanEqualInfo, "GreaterThanEqual": opGreaterThanEqualInfo, "GE": opGreaterThanEqualInfo,
+		"IsBefore": opBeforeInfo, "Before": opBeforeInfo,
+		"IsAfter": opAfterInfo, "After": opAfterInfo,
+		"IsLike": opLikeInfo, "Like": opLikeInfo,
+		"IsNotLike": opNotLikeInfo, "NotLike": opNotLikeInfo,
+		"IsStartWith": opStartWithInfo, "StartWith": opStartWithInfo, "HasPrefix": opStartWithInfo,
+		"IsEndWith": opEndWithInfo, "EndWith": opEndWithInfo, "HasSuffix": opEndWithInfo,
+		"IsNotEmpty": opNotEmptyInfo, "NotEmpty": opNotEmptyInfo,
+		"IsEmpty": opEmptyInfo, "Empty": opEmptyInfo,
+		"IsContain": opContainInfo, "Contain": opContainInfo,
+		"IsNotIn": opNotInInfo, "NotIN": opNotInInfo,
+		"IsIn": opInInfo, "IN": opInInfo,
+		"MatchesRegex": opRegexInfo, "Matches": opRegexInfo, "Regex": opRegexInfo,
+		"Exists": opExistsInfo,
+		"IsTrue": opTrueInfo, "True": opTrueInfo,
+		"IsFalse": opFalseInfo, "False": opFalseInfo,
+		"IsNot": opNotInfo, "Not": opNotInfo,
+		"Is": opEqualInfo, "Equals": opEqualInfo,
+	}
+
 	LogicAnd = "And"
 	LogicOr  = "Or"
 
-	SortBy = "SortBy"
+	SortBy  = "SortBy"
+	GroupBy = "GroupBy"
 
-	AllLogic = []string{"And", "Or"}
+	AllLogic = []string{LogicAnd, LogicOr}
 
 	AllOp = Concat(
 		opBetween,
@@ -135,60 +193,10 @@ func NewPredicate(field, op, logic string) *Predicate {
 	AssertIn([]string{"", LogicAnd, LogicOr}, logic)
 
 	p := &Predicate{Field: field, OpText: op, Logic: logic, ParamCount: 1}
-	if IsInStringSlice(opBetween, op) {
-		p.OpCode = OpBetween
-		p.ParamCount = 2
-	} else if IsInStringSlice(opNotNull, op) {
-		p.OpCode = OpNotNull
-		p.ParamCount = 0
-	} else if IsInStringSlice(opNull, op) {
-		p.OpCode = OpNull
-		p.ParamCount = 0
-	} else if IsInStringSlice(opLessThan, op) {
-		p.OpCode = OpLessThan
-	} else if IsInStringSlice(opLessThanEqual, op) {
-		p.OpCode = OpLessThanEqual
-	} else if IsInStringSlice(opGreaterThan, op) {
-		p.OpCode = OpGreaterThan
-	} else if IsInStringSlice(opGreaterThanEqual, op) {
-		p.OpCode = OpGreaterThanEqual
-	} else if IsInStringSlice(opLike, op) {
-		p.OpCode = OpLike
-	} else if IsInStringSlice(opNotLike, op) {
-		p.OpCode = OpNotLike
-	} else if IsInStringSlice(opStartWith, op) {
-		p.OpCode = OpStartWith
-	} else if IsInStringSlice(opEndWith, op) {
-		p.OpCode = OpEndWith
-	} else if IsInStringSlice(opNotEmpty, op) {
-		p.OpCode = OpNotEmpty
-		p.ParamCount = 0
-	} else if IsInStringSlice(opEmpty, op) {
-		p.OpCode = OpEmpty
-		p.ParamCount = 0
-	} else if IsInStringSlice(opContain, op) {
-		p.OpCode = OpContain
-	} else if IsInStringSlice(opIn, op) {
-		p.OpCode = OpIn
-	} else if IsInStringSlice(opNotIn, op) {
-		p.OpCode = OpNotIn
-	} else if IsInStringSlice(opRegex, op) {
-		p.OpCode = OpRegex
-	} else if IsInStringSlice(opExists, op) {
-		p.OpCode = OpExists
-		p.ParamCount = 0
-	} else if IsInStringSlice(opTrue, op) {
-		p.OpCode = OpTrue
-		p.ParamCount = 0
-	} else if IsInStringSlice(opFalse, op) {
-		p.OpCode = OpFalse
-		p.ParamCount = 0
-	} else if IsInStringSlice(opNot, op) {
-		p.OpCode = OpNot
-	} else if IsInStringSlice(opEqual, op) || op == "" {
-		p.OpCode = OpEqual
+	if info, ok := OpCodeMap[op]; ok {
+		p.OpCode = info.OpCode
+		p.ParamCount = info.ParamCount
 	}
-
 	return p
 }
 
