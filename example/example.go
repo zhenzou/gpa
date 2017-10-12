@@ -18,7 +18,7 @@ func (m *Model) findById(id string) (model *Model, err error) {
 
 }
 
-// must no use *[]*Model
+// must not use *[]*Model
 func (m *Model) findByName(name string) (models []*Model, err error) {
 
 }
