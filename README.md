@@ -2,11 +2,12 @@
 gpa is a experimental,spring-data-jpa like code generator for GO.
 For now,it is only impl little feature.
 
-<strong>NOTE: it is experimental,and the code generated may be not usable.
+<strong>NOTE: it is experimental so the code generated may be not usable.
 
-<strong>NOTE: it is just a toy,so you should not use it :).
+## Example
+$ go run main.go -file ./example/example.go
 
-## example
+### before
 ```go
 package example
 
@@ -54,9 +55,7 @@ func (m *Model) findByAgeBetween(min, max, limit, offset int) (models []*Model, 
 }
 ```
 
-$ go run main.go -file ./example/example.go
-
-After：
+### After：
 
 ```go
 package example

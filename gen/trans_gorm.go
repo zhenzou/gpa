@@ -35,6 +35,7 @@ func (g *GormTransformer) TransformCreate(create *common.Create) string {
 
 func (g *GormTransformer) TransformUpdate(update *common.Update) string {
 	tb := common.TableName(update.Table)
+	// 第一个参数是更新的值，暂时不支持按字段更新
 	where := g.transformPredicates(update.Predicates, update.Func.Params[1:])
 	expr := fmt.Sprintf(UpdateTemplate, GetDb, tb, where, update.Func.Params[0])
 	_, decls := g.transformResult(update.Func.Receiver.Typ, update.Func.Results)
@@ -50,7 +51,7 @@ func (g *GormTransformer) transformPredicates(predicates []*common.Predicate, pa
 	buf := bytes.NewBufferString(`"`)
 	for i, p := range predicates {
 		col := common.TableName(p.Field)
-		g.writeBuf(buf, p.Logic)
+		g.writeBuf(buf, strings.ToUpper(p.Logic))
 		g.writeBuf(buf, col)
 		switch p.OpCode {
 		case common.OpBetween:
@@ -230,8 +231,7 @@ func (g *GormTransformer) transformModel(field *common.Field) (string, string) {
 
 func (g *GormTransformer) TransformDelete(delete *common.Delete) string {
 	tb := common.TableName(delete.Table)
-	// 第一个参数是更新的值，暂时不支持按字段更新
-	where := g.transformPredicates(delete.Predicates, delete.Func.Params[1:])
+	where := g.transformPredicates(delete.Predicates, delete.Func.Params)
 	_, decls := g.transformResult(delete.Func.Receiver.Typ, delete.Func.Results)
 	expr := fmt.Sprintf(DeleteTemplate, GetDb, tb, where)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
