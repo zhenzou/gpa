@@ -82,7 +82,7 @@ func (m *Model) findById(id string) (model *Model, err error) {
 
 }
 
-// must no use *[]*Model
+// must not use *[]*Model
 func (m *Model) findByName(name string) (models []*Model, err error) {
 	models = []*Model{}
 
@@ -94,21 +94,21 @@ func (m *Model) findByName(name string) (models []*Model, err error) {
 func (m *Model) findByNameAndLastname(name, lastName string) (models []*Model, err error) {
 	models = []*Model{}
 
-	err = GetDb().Table("model").Find(&models, " name =? And lastname =? ", name, lastName).Error
+	err = GetDb().Table("model").Find(&models, " name =? AND lastname =? ", name, lastName).Error
 	return models, err
 
 }
 
 func (m *Model) deleteByName(name string) (error) {
 	var err error
-	err = GetDb().Table("model").Delete(" name =? ", ).Error
+	err = GetDb().Table("model").Delete(" name =? ", name).Error
 	return err
 
 }
 
 func (m *Model) deleteByIdAndLastName(id, lastName string) (err error) {
 
-	err = GetDb().Table("model").Delete(" id =? And last_name =? ", lastName).Error
+	err = GetDb().Table("model").Delete(" id =? AND last_name =? ", id, lastName).Error
 	return err
 
 }
