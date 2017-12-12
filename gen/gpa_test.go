@@ -14,6 +14,6 @@ var (
 
 func TestGpa_Process(t *testing.T) {
 	gopath := os.Getenv("GOPATH")
-	fp := filepath.Join(gopath, "src", "github.com/zhenzou/gpa/example/example.go", )
+	fp := filepath.Join(gopath, "src", "github.com", "zhenzou", "gpa", "example", "example.go")
 	gpa.Process(fp)
 }

@@ -65,7 +65,6 @@ func Infof(format string, args ...interface{}) {
 		p := prefix()
 		log.Println(p+" [I]", fmt.Sprintf(format, args))
 	}
-
 }
 
 func Warn(args ...interface{}) {

@@ -139,7 +139,7 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
 func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 
 	fields := []*common.Field{}
-	typ := strings.TrimSpace(string(data[field.Type.Pos()-1 : field.Type.End()-1]))
+	typ := strings.TrimSpace(string(data[field.Type.Pos()-1: field.Type.End()-1]))
 	isPointer := false
 	isSlice := false
 
