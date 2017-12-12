@@ -1,11 +1,19 @@
 package gen
 
-import "testing"
+import (
+	"testing"
+	"os"
+	"path/filepath"
+
+	"github.com/zhenzou/gpa/common"
+)
 
 var (
-	gpa = NewDebugGpa(&Generator{})
+	gpa = NewDebugGpa(NewGenerator(&GormTransformer{}, &common.GpaParser{}))
 )
 
 func TestGpa_Process(t *testing.T) {
-	gpa.Process("/media/Media/Projects/Go/GOPATH/src/gpa/gen/gpa_test.go")
+	gopath := os.Getenv("GOPATH")
+	fp := filepath.Join(gopath, "src", "github.com/zhenzou/gpa/example/example.go", )
+	gpa.Process(fp)
 }

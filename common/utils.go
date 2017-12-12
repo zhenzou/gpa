@@ -92,7 +92,7 @@ func MapIndexed(s string, f func(int, rune) bool) string {
 	return s
 }
 
-// 如果以大写开头，则将首字母改为小写，如果以小写字幕开头则取前三个字幕
+// 如果以大写开头，则将首字母改为小写，如果以小写字幕开头则取前三个字母
 // TypeName->typeName
 // error->err
 func VarName(typeName string, plural bool) string {

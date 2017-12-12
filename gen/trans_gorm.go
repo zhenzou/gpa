@@ -3,9 +3,9 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/zhenzou/gpa/common"
-	"strings"
 )
 
 const (
