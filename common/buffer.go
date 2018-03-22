@@ -73,3 +73,7 @@ func (o *OutputBuffer) WriteByteAt(b byte, off int) (err error) {
 func (o *OutputBuffer) String() string {
 	return o.buf.String()
 }
+
+func (o *OutputBuffer) Bytes() []byte {
+	return o.buf.Bytes()
+}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/zhenzou/gpa/common"
+	"github.com/zhenzou/gpa/util"
 )
 
 const (
@@ -26,15 +26,15 @@ const (
 type GormTransformer struct {
 }
 
-func (g *GormTransformer) TransformCreate(create *common.Create) string {
-	tb := common.TableName(create.Table)
+func (g *GormTransformer) TransformCreate(create *CreateFunc) string {
+	tb := util.TableName(create.Table)
 	expr := fmt.Sprintf(CreateTemplate, GetDb, tb, create.Func.Params[0])
 	_, decls := g.transformResult(create.Func.Receiver.Typ, create.Func.Results)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
 }
 
-func (g *GormTransformer) TransformUpdate(update *common.Update) string {
-	tb := common.TableName(update.Table)
+func (g *GormTransformer) TransformUpdate(update *UpdateFunc) string {
+	tb := util.TableName(update.Table)
 	// 第一个参数是更新的值，暂时不支持按字段更新
 	where := g.transformPredicates(update.Predicates, update.Func.Params[1:])
 	expr := fmt.Sprintf(UpdateTemplate, GetDb, tb, where, update.Func.Params[0])
@@ -47,56 +47,56 @@ func (g *GormTransformer) writeBuf(buf *bytes.Buffer, str string) *bytes.Buffer 
 	return buf
 }
 
-func (g *GormTransformer) transformPredicates(predicates []*common.Predicate, params []*common.Field) string {
+func (g *GormTransformer) transformPredicates(predicates []*Predicate, params []*Field) string {
 	buf := bytes.NewBufferString(`"`)
 	for i, p := range predicates {
-		col := common.TableName(p.Field)
+		col := util.TableName(p.Field)
 		g.writeBuf(buf, strings.ToUpper(p.Logic))
 		g.writeBuf(buf, col)
 		switch p.OpCode {
-		case common.OpBetween:
+		case OpBetween:
 			g.writeBuf(buf, "BETWEEN ? AND ?")
-		case common.OpNotNull:
+		case OpNotNull:
 			g.writeBuf(buf, "IS NOT NULL")
-		case common.OpNull:
+		case OpNull:
 			g.writeBuf(buf, "IS NULL")
-		case common.OpLessThan:
+		case OpLessThan:
 			g.writeBuf(buf, "<?")
-		case common.OpLessThanEqual:
+		case OpLessThanEqual:
 			g.writeBuf(buf, "<=?")
-		case common.OpGreaterThan:
+		case OpGreaterThan:
 			g.writeBuf(buf, ">?")
-		case common.OpGreaterThanEqual:
+		case OpGreaterThanEqual:
 			g.writeBuf(buf, ">= ?")
-		case common.OpLike:
+		case OpLike:
 			g.writeBuf(buf, "LIKE ?")
 			params[i].Name = `"%"+` + params[i].Name + `+"%"`
-		case common.OpNotLike:
+		case OpNotLike:
 			g.writeBuf(buf, "NOT LIKE ?")
 			params[i].Name = `"%"+` + params[i].Name + `+"%"`
-		case common.OpStartWith:
+		case OpStartWith:
 			g.writeBuf(buf, "LIKE ?")
 			params[i].Name = params[i].Name + `+"%"`
-		case common.OpEndWith:
+		case OpEndWith:
 			g.writeBuf(buf, "LIKE ?")
 			params[i].Name = `"%"+` + params[i].Name
-		case common.OpNotEmpty:
+		case OpNotEmpty:
 			g.writeBuf(buf, "<> ''")
-		case common.OpEmpty:
-			//TODO
-		case common.OpIn:
+		case OpEmpty:
+			// TODO
+		case OpIn:
 			g.writeBuf(buf, "IN ?")
-		case common.OpRegex:
+		case OpRegex:
 			g.writeBuf(buf, "REGEXP ?")
-		case common.OpNotIn:
+		case OpNotIn:
 			g.writeBuf(buf, "NOT IN ?")
-		case common.OpTrue:
+		case OpTrue:
 			g.writeBuf(buf, "=true")
-		case common.OpFalse:
+		case OpFalse:
 			g.writeBuf(buf, "=false")
-		case common.OpNot:
+		case OpNot:
 			g.writeBuf(buf, "<>?")
-		case common.OpEqual:
+		case OpEqual:
 			g.writeBuf(buf, "=?")
 		}
 	}
@@ -114,28 +114,28 @@ func (g *GormTransformer) transformPredicates(predicates []*common.Predicate, pa
 }
 
 var (
-	//如果有这两个参数，应该在最后面，而且应该同时出现
-	Limit = common.Field{
+	// 如果有这两个参数，应该在最后面，而且应该同时出现
+	Limit = Field{
 		Name: "limit",
-		Typ: common.Type{
+		Typ: Type{
 			TypeName:  "int",
 			IsPointer: false,
 		},
 		IsPointer: false,
 		IsSlice:   false,
 	}
-	Offset = common.Field{
+	Offset = Field{
 		Name: "offset",
-		Typ: common.Type{
+		Typ: Type{
 			TypeName:  "int",
 			IsPointer: false,
 		},
 		IsPointer: false,
 		IsSlice:   false,
 	}
-	Err = common.Field{
+	Err = Field{
 		Name: "err",
-		Typ: common.Type{
+		Typ: Type{
 			TypeName:  "error",
 			IsPointer: false,
 		},
@@ -144,8 +144,8 @@ var (
 	}
 )
 
-func (g *GormTransformer) TransformFind(find *common.Find) string {
-	tb := common.TableName(find.Table)
+func (g *GormTransformer) TransformFind(find *FindFunc) string {
+	tb := util.TableName(find.Table)
 	end := len(find.Func.Params)
 	var page string
 	if len(find.Func.Params)-find.ParamCount == 2 {
@@ -161,7 +161,7 @@ func (g *GormTransformer) TransformFind(find *common.Find) string {
 }
 
 // 检查参数中有没有分页相关参数
-func (g *GormTransformer) checkPage(fields []*common.Field) bool {
+func (g *GormTransformer) checkPage(fields []*Field) bool {
 	length := len(fields) - 2
 	if (*fields[length] == Limit && *fields[length+1] == Offset) || (*fields[length] == Offset && *fields[length+1] == Limit) {
 		return true
@@ -173,8 +173,8 @@ func (g *GormTransformer) checkPage(fields []*common.Field) bool {
 // 暂时只支持（model，error）或者（error）这种吧，其他的没啥必要了，这样也简单
 // return modelName,声明列表
 // TODO 重构
-func (g *GormTransformer) transformResult(recv common.Type, result []*common.Field) (string, []string) {
-	decls := []string{}
+func (g *GormTransformer) transformResult(recv Type, result []*Field) (string, []string) {
+	var decls []string
 	var modelName string
 	if len(result) == 0 {
 		decls = append(decls, ErrorDecl)
@@ -192,7 +192,7 @@ func (g *GormTransformer) transformResult(recv common.Type, result []*common.Fie
 	return modelName, decls
 }
 
-func (g *GormTransformer) transformError(field *common.Field) string {
+func (g *GormTransformer) transformError(field *Field) string {
 	if field.Typ.TypeName == "error" {
 		if field.Name == "" {
 			return ErrorDecl
@@ -201,7 +201,7 @@ func (g *GormTransformer) transformError(field *common.Field) string {
 	return ""
 }
 
-func (g *GormTransformer) transformModel(field *common.Field) (string, string) {
+func (g *GormTransformer) transformModel(field *Field) (string, string) {
 	name := field.Name
 	typ := field.Typ.TypeName
 	equal := "="
@@ -209,7 +209,7 @@ func (g *GormTransformer) transformModel(field *common.Field) (string, string) {
 	if field.IsSlice {
 		if field.Name == "" {
 			equal = ":="
-			name = common.VarName(field.Typ.TypeName, true)
+			name = util.VarName(field.Typ.TypeName, true)
 		}
 		if field.Typ.IsPointer {
 			typ = "*" + typ
@@ -218,7 +218,7 @@ func (g *GormTransformer) transformModel(field *common.Field) (string, string) {
 		template = ModelDecl
 		if field.Name == "" {
 			equal = ":="
-			name = common.VarName(field.Typ.TypeName, false)
+			name = util.VarName(field.Typ.TypeName, false)
 		}
 		if field.IsPointer {
 			typ = "&" + typ
@@ -229,8 +229,8 @@ func (g *GormTransformer) transformModel(field *common.Field) (string, string) {
 	return name, decl
 }
 
-func (g *GormTransformer) TransformDelete(delete *common.Delete) string {
-	tb := common.TableName(delete.Table)
+func (g *GormTransformer) TransformDelete(delete *DeleteFunc) string {
+	tb := util.TableName(delete.Table)
 	where := g.transformPredicates(delete.Predicates, delete.Func.Params)
 	_, decls := g.transformResult(delete.Func.Receiver.Typ, delete.Func.Results)
 	expr := fmt.Sprintf(DeleteTemplate, GetDb, tb, where)

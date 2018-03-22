@@ -7,10 +7,10 @@ import (
 	"runtime"
 )
 
-type LogLevel int
+type level int
 
 const (
-	LevelDebug LogLevel = iota + 1
+	LevelDebug level = iota + 1
 	LevelInfo
 	LevelWarn
 	LevelError
@@ -20,7 +20,7 @@ var (
 	logLevel = LevelDebug
 )
 
-func SetLevel(level LogLevel) {
+func SetLevel(level level) {
 	logLevel = level
 }
 
@@ -35,7 +35,7 @@ func prefix() string {
 	return fmt.Sprintf("%s:%d", file, line)
 }
 
-func logEnable(level LogLevel) bool {
+func logEnable(level level) bool {
 	return level >= logLevel
 }
 

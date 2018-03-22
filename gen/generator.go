@@ -2,11 +2,9 @@ package gen
 
 import (
 	"errors"
-
-	"github.com/zhenzou/gpa/common"
 )
 
-func NewGenerator(trans Transformer, parser common.Parser) *Generator {
+func NewGenerator(trans Transformer, parser Parser) *Generator {
 	return &Generator{
 		trans:  trans,
 		parser: parser,
@@ -15,10 +13,10 @@ func NewGenerator(trans Transformer, parser common.Parser) *Generator {
 
 type Generator struct {
 	trans  Transformer
-	parser common.Parser
+	parser Parser
 }
 
-func (g *Generator) Generate(f *common.Func) (code string, err error) {
+func (g *Generator) Generate(f *Func) (code string, err error) {
 	if c, err := g.parser.ParseCreate(f); err == nil {
 		code = g.trans.TransformCreate(c)
 	} else if d, err := g.parser.ParseDelete(f); err == nil {

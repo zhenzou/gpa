@@ -1,6 +1,9 @@
-package common
+package util
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestTableName(t *testing.T) {
 	type args struct {
@@ -44,6 +47,26 @@ func TestVarName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := VarName(tt.args.typeName, tt.args.plural); got != tt.want {
 				t.Errorf("VarName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConcat(t *testing.T) {
+	type args struct {
+		strings [][]string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{"Concat1", args{[][]string{{"123", "456"}, {"789"}}}, []string{"123", "456", "789"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Concat(tt.args.strings...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Concat() = %v, want %v", got, tt.want)
 			}
 		})
 	}

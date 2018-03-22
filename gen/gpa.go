@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/format"
 	"go/token"
 	"io/ioutil"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/zhenzou/gpa/common"
 	"github.com/zhenzou/gpa/log"
+	"github.com/zhenzou/gpa/util"
 )
 
 var (
@@ -49,7 +51,7 @@ func RewriteHandler(fp, origin, result string) error {
 }
 
 type Gpa struct {
-	filter  string //reg
+	filter  string // reg
 	root    string
 	handler PostHandler
 	gen     *Generator
@@ -58,19 +60,23 @@ type Gpa struct {
 func (g *Gpa) Process(fp string) {
 	file, err := os.Stat(fp)
 	if err != nil {
-		panic(err)
+		fmt.Printf("file or dir %s does not exist", fp)
+		return
 	}
 	if file.IsDir() {
 		filepath.Walk(fp, g.visitFile)
-	} else if common.IsGoFile(file) {
-		g.processFile(fp)
+	} else if util.IsGoFile(file) {
+		err = g.processFile(fp)
+		if err != nil {
+			log.Error(err.Error())
+		}
 	} else {
-		fmt.Println("need a go file")
+		fmt.Println("need a go file or dir")
 	}
 }
 
 func (g *Gpa) visitFile(path string, f os.FileInfo, err error) error {
-	if err == nil && common.IsGoFile(f) {
+	if err == nil && util.IsGoFile(f) {
 		err = g.processFile(path)
 	}
 	if err != nil && !os.IsNotExist(err) {
@@ -104,16 +110,20 @@ func (g *Gpa) processFile(fp string) error {
 			}
 		}
 	}
-	if err = g.handler(fp, string(data), buf.String()); err != nil {
+	result, err := format.Source(buf.Bytes())
+	if err != nil {
+		return err
+	}
+	if err = g.handler(fp, string(data), string(result)); err != nil {
 		log.Error(err.Error())
 	}
 	return err
 }
 
-func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
+func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *Func {
 	fn := decl.Name.Name
-	params := []*common.Field{}
-	results := []*common.Field{}
+	var params []*Field
+	var results []*Field
 	for _, f := range decl.Type.Params.List {
 		params = append(params, g.extractField(data, f)...)
 	}
@@ -121,7 +131,7 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
 		results = append(results, g.extractField(data, f)...)
 	}
 
-	f := &common.Func{
+	f := &Func{
 		FullName: fn,
 		Params:   params,
 		Results:  results,
@@ -136,10 +146,10 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *common.Func {
 
 // NOTE 一些错误没有处理
 // 假设，方法除了没有方法体以外，没有其他语法错误
-func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
+func (g *Gpa) extractField(data []byte, field *ast.Field) []*Field {
 
-	fields := []*common.Field{}
-	typ := strings.TrimSpace(string(data[field.Type.Pos()-1: field.Type.End()-1]))
+	var fields []*Field
+	typ := strings.TrimSpace(string(data[field.Type.Pos()-1 : field.Type.End()-1]))
 	isPointer := false
 	isSlice := false
 
@@ -163,16 +173,16 @@ func (g *Gpa) extractField(data []byte, field *ast.Field) []*common.Field {
 	}
 	if len(field.Names) > 0 {
 		for _, name := range field.Names {
-			fields = append(fields, &common.Field{
-				Typ:       common.Type{IsPointer: isPointer, TypeName: typ},
+			fields = append(fields, &Field{
+				Typ:       Type{IsPointer: isPointer, TypeName: typ},
 				IsPointer: isPointer,
 				IsSlice:   isSlice,
 				Name:      strings.TrimSpace(name.Name),
 			})
 		}
 	} else {
-		fields = append(fields, &common.Field{
-			Typ:       common.Type{IsPointer: isPointer, TypeName: typ},
+		fields = append(fields, &Field{
+			Typ:       Type{IsPointer: isPointer, TypeName: typ},
 			IsPointer: isPointer,
 			IsSlice:   isSlice,
 		})

@@ -1,4 +1,4 @@
-package common
+package util
 
 import (
 	"os"
@@ -50,15 +50,15 @@ func AssertPrefix(str string, prefix string) {
 }
 
 func Concat(strings ...[]string) []string {
-	ss := []string{}
+	var ss []string
 	for _, str := range strings {
 		ss = append(ss, str...)
 	}
 	return ss
 }
 
-func AnyPrefix(s string, prefixs []string) (prefix string, ok bool) {
-	for _, prefix = range prefixs {
+func AnyPrefix(s string, prefixes []string) (prefix string, ok bool) {
+	for _, prefix = range prefixes {
 		if strings.HasPrefix(s, prefix) {
 			ok = true
 			return

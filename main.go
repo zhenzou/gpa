@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 
-	"github.com/zhenzou/gpa/common"
 	"github.com/zhenzou/gpa/gen"
+	"github.com/zhenzou/gpa/log"
 )
 
 var (
@@ -22,9 +22,9 @@ func init() {
 func main() {
 	var gpa *gen.Gpa
 	if debug {
-		gpa = gen.NewDebugGpa(gen.NewGenerator(&gen.GormTransformer{}, &common.GpaParser{}))
+		gpa = gen.NewDebugGpa(gen.NewGenerator(&gen.GormTransformer{}, &gen.GpaParser{}))
 	} else {
-		gpa = gen.NewRewriteGpa(gen.NewGenerator(&gen.GormTransformer{}, &common.GpaParser{}))
+		gpa = gen.NewRewriteGpa(gen.NewGenerator(&gen.GormTransformer{}, &gen.GpaParser{}))
 	}
 	gpa.Process(filename)
 }

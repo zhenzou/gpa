@@ -1,4 +1,4 @@
-package common
+package gen
 
 import (
 	"reflect"
@@ -17,10 +17,10 @@ func TestGpaParser_trimPrefix(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"trimPrefix1", args{"findAll", "Find"}, "All", false},
-		{"trimPrefix2", args{"FindAll", "Find"}, "All", false},
+		{"trimPrefix1", args{"findAll", "FindFunc"}, "All", false},
+		{"trimPrefix2", args{"FindAll", "FindFunc"}, "All", false},
 		{"trimPrefix3", args{"findAll", "Find1"}, "", true},
-		{"trimPrefix4", args{"finAll", "Find"}, "", true},
+		{"trimPrefix4", args{"finAll", "FindFunc"}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -99,7 +99,7 @@ func TestGpaParser_ParseCreate(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		wantCreate *Create
+		wantCreate *CreateFunc
 		wantErr    bool
 	}{}
 	for _, tt := range tests {
@@ -125,12 +125,12 @@ func TestGpaParser_ParseDelete(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		wantDelete *Delete
+		wantDelete *DeleteFunc
 		wantErr    bool
 	}{
-		{"ParseDelete1", args{fd: func1}, &Delete{Table: "Model", Func: func1, Predicates: predicates1}, false},
-		{"ParseDelete2", args{fd: func2}, &Delete{Table: "Model", Func: func2, Predicates: predicates2}, false},
-		{"ParseDelete3", args{fd: func3}, &Delete{Table: "Model", Func: func3, Predicates: predicates3}, false},
+		{"ParseDelete1", args{fd: func1}, &DeleteFunc{Table: "Model", Func: func1, Predicates: predicates1}, false},
+		{"ParseDelete2", args{fd: func2}, &DeleteFunc{Table: "Model", Func: func2, Predicates: predicates2}, false},
+		{"ParseDelete3", args{fd: func3}, &DeleteFunc{Table: "Model", Func: func3, Predicates: predicates3}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -212,7 +212,7 @@ func TestGpaParser_ParseUpdate(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		wantUpdate *Update
+		wantUpdate *UpdateFunc
 		wantErr    bool
 	}{
 		// TODO: Add test cases.
@@ -240,7 +240,7 @@ func TestGpaParser_ParseFind(t *testing.T) {
 	tests := []struct {
 		name     string
 		args     args
-		wantFind *Find
+		wantFind *FindFunc
 		wantErr  bool
 	}{
 		// TODO: Add test cases.

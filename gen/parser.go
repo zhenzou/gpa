@@ -1,4 +1,4 @@
-package common
+package gen
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/zhenzou/gpa/log"
+	"github.com/zhenzou/gpa/util"
 )
 
 const (
@@ -42,13 +43,13 @@ type Func struct {
 }
 
 type Parser interface {
-	ParseCreate(fd *Func) (*Create, error)
-	ParseDelete(fd *Func) (*Delete, error)
-	ParseUpdate(fd *Func) (*Update, error)
-	ParseFind(fd *Func) (*Find, error)
+	ParseCreate(fd *Func) (*CreateFunc, error)
+	ParseDelete(fd *Func) (*DeleteFunc, error)
+	ParseUpdate(fd *Func) (*UpdateFunc, error)
+	ParseFind(fd *Func) (*FindFunc, error)
 }
 
-//TODO 类型检查，参数检查
+// TODO 类型检查，参数检查
 type GpaParser struct {
 }
 
@@ -66,8 +67,8 @@ func (g *GpaParser) trimPrefix(fullName, prefix string) (string, error) {
 
 // NOTE 暂时只支持使用Receiver作为Table的这种格式吧
 // 参考：example
-func (g *GpaParser) ParseCreate(fd *Func) (create *Create, err error) {
-	create = &Create{Func: fd}
+func (g *GpaParser) ParseCreate(fd *Func) (create *CreateFunc, err error) {
+	create = &CreateFunc{Func: fd}
 	if _, err = g.trimPrefix(fd.FullName, CreatePrefix); err != nil {
 		return
 	}
@@ -77,7 +78,7 @@ func (g *GpaParser) ParseCreate(fd *Func) (create *Create, err error) {
 	return
 }
 
-func (g *GpaParser) ParseDelete(fd *Func) (delete *Delete, err error) {
+func (g *GpaParser) ParseDelete(fd *Func) (delete *DeleteFunc, err error) {
 	var fullName string
 	if fullName, err = g.trimPrefix(fd.FullName, DeletePrefix); err != nil {
 		return
@@ -94,7 +95,7 @@ func (g *GpaParser) ParseDelete(fd *Func) (delete *Delete, err error) {
 			if len(fd.Params) < paramCount {
 				err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 			}
-			delete = &Delete{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
+			delete = &DeleteFunc{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
 		} else {
 			err = errors.New(fullName + " should start with By")
 		}
@@ -127,7 +128,7 @@ func (g *GpaParser) extractPredicate(str string) (predicates []*Predicate, param
 		} else {
 			var prefix string
 			var ok bool
-			if prefix, ok = AnyPrefix(str, AllLogic); ok {
+			if prefix, ok = util.AnyPrefix(str, AllLogic); ok {
 				predicate := NewPredicate(field, op, logic)
 				predicates = append(predicates, predicate)
 				paramCount += predicate.ParamCount
@@ -135,7 +136,7 @@ func (g *GpaParser) extractPredicate(str string) (predicates []*Predicate, param
 				op = ""
 				field = ""
 				hasField = false
-			} else if prefix, ok = AnyPrefix(str, AllOp); ok {
+			} else if prefix, ok = util.AnyPrefix(str, AllOp); ok {
 				op = prefix
 			} else {
 				if prefix, err = g.extractTitle(str); err != nil {
@@ -172,7 +173,7 @@ func (g *GpaParser) extractTitle(str string) (title string, err error) {
 }
 
 // TODO 重构
-func (g *GpaParser) ParseUpdate(fd *Func) (update *Update, err error) {
+func (g *GpaParser) ParseUpdate(fd *Func) (update *UpdateFunc, err error) {
 	var fullName string
 	if fullName, err = g.trimPrefix(fd.FullName, UpdatePrefix); err != nil {
 		return
@@ -189,7 +190,7 @@ func (g *GpaParser) ParseUpdate(fd *Func) (update *Update, err error) {
 			if len(fd.Params) < paramCount+1 {
 				err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 			}
-			update = &Update{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
+			update = &UpdateFunc{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
 		} else {
 			err = errors.New(fullName + " should start with By")
 		}
@@ -197,15 +198,15 @@ func (g *GpaParser) ParseUpdate(fd *Func) (update *Update, err error) {
 	return
 }
 
-//TODO SortBy GroupBy
-func (g *GpaParser) ParseFind(fd *Func) (find *Find, err error) {
+// TODO SortBy GroupBy
+func (g *GpaParser) ParseFind(fd *Func) (find *FindFunc, err error) {
 	var fullName string
 
 	if fullName, err = g.trimPrefix(fd.FullName, FindPrefix); err != nil {
 		return
 	}
 	if fullName == "" || fullName == "All" {
-		find = &Find{Func: fd, Table: fd.Receiver.Typ.TypeName}
+		find = &FindFunc{Func: fd, Table: fd.Receiver.Typ.TypeName}
 		return
 	}
 	if strings.HasPrefix(fullName, By) {
@@ -217,7 +218,7 @@ func (g *GpaParser) ParseFind(fd *Func) (find *Find, err error) {
 		if len(fd.Params) < paramCount {
 			err = fmt.Errorf("%s:%s require %d param but found %d", fd.FileName, fd.FullName, paramCount, len(fd.Params))
 		}
-		find = &Find{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
+		find = &FindFunc{Func: fd, Table: fd.Receiver.Typ.TypeName, Predicates: predicates, ParamCount: paramCount}
 	} else {
 		err = errors.New(fullName + " should start with By")
 	}

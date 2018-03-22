@@ -4,12 +4,10 @@ import (
 	"testing"
 	"os"
 	"path/filepath"
-
-	"github.com/zhenzou/gpa/common"
 )
 
 var (
-	gpa = NewDebugGpa(NewGenerator(&GormTransformer{}, &common.GpaParser{}))
+	gpa = NewDebugGpa(NewGenerator(&GormTransformer{}, &GpaParser{}))
 )
 
 func TestGpa_Process(t *testing.T) {
