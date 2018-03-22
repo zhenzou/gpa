@@ -3,11 +3,27 @@ package log
 import (
 	"fmt"
 	"log"
-	"path/filepath"
-	"runtime"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 type level int
+
+func (l level) String() string {
+	switch l {
+	case LevelDebug:
+		return "[D] "
+	case LevelInfo:
+		return "[I] "
+	case LevelWarn:
+		return "[W] "
+	case LevelError:
+		return "[E] "
+	}
+	return ""
+}
 
 const (
 	LevelDebug level = iota + 1
@@ -24,73 +40,62 @@ func SetLevel(level level) {
 	logLevel = level
 }
 
-func prefix() string {
-	var ok bool
-	_, file, line, ok := runtime.Caller(2)
-	if !ok {
-		file = "???"
-		line = 0
-	}
-	file = filepath.Base(file)
-	return fmt.Sprintf("%s:%d", file, line)
-}
-
 func logEnable(level level) bool {
 	return level >= logLevel
 }
 
 func Debug(args ...interface{}) {
 	if logEnable(LevelDebug) {
-		p := prefix()
-		log.Println(p+" [D]", args)
+		log.SetPrefix(LevelDebug.String())
+		log.Output(3, fmt.Sprintln(args...))
 	}
 }
 
 func Debugf(format string, args ...interface{}) {
 	if logEnable(LevelDebug) {
-		p := prefix()
-		log.Println(p+" [D]", fmt.Sprintf(format, args))
+		log.SetPrefix(LevelDebug.String())
+		log.Output(3, fmt.Sprintf(format, args...))
 	}
 }
 
 func Info(args ...interface{}) {
 	if logEnable(LevelInfo) {
-		p := prefix()
-		log.Println(p+" [I]", args)
+		log.SetPrefix(LevelInfo.String())
+		log.Output(3, fmt.Sprintln(args...))
 	}
 }
 
 func Infof(format string, args ...interface{}) {
 	if logEnable(LevelInfo) {
-		p := prefix()
-		log.Println(p+" [I]", fmt.Sprintf(format, args))
+		log.SetPrefix(LevelInfo.String())
+		log.Output(3, fmt.Sprintf(format, args...))
 	}
 }
 
 func Warn(args ...interface{}) {
 	if logEnable(LevelWarn) {
-		p := prefix()
-		log.Println(p+" [W]:", args)
+		log.SetPrefix(LevelWarn.String())
+		log.Output(3, fmt.Sprintln(args...))
 	}
 }
 
 func Warnf(format string, args ...interface{}) {
 	if logEnable(LevelWarn) {
-		p := prefix()
-		log.Println(p+" [W]:", fmt.Sprintf(format, args))
+		log.SetPrefix(LevelWarn.String())
+		log.Output(3, fmt.Sprintf(format, args...))
 	}
 }
 
 func Error(args ...interface{}) {
-	if logEnable(LevelError) {
-		p := prefix()
-		log.Println(p+" [E]", args)
+	if logEnable(LevelWarn) {
+		log.SetPrefix(LevelInfo.String())
+		log.Output(3, fmt.Sprintln(args...))
 	}
 }
 
 func Errorf(format string, args ...interface{}) {
 	if logEnable(LevelError) {
-		p := prefix()
-		log.Println(p+" [E]", fmt.Sprintf(format, args))
+		log.SetPrefix(LevelError.String())
+		log.Output(3, fmt.Sprintf(format, args...))
 	}
 }

@@ -60,7 +60,7 @@ type Gpa struct {
 func (g *Gpa) Process(fp string) {
 	file, err := os.Stat(fp)
 	if err != nil {
-		fmt.Printf("file or dir %s does not exist", fp)
+		fmt.Printf("file or dir %s does not exist\n", fp)
 		return
 	}
 	if file.IsDir() {

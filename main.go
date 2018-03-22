@@ -4,7 +4,6 @@ import (
 	"flag"
 
 	"github.com/zhenzou/gpa/gen"
-	"github.com/zhenzou/gpa/log"
 )
 
 var (
