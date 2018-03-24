@@ -18,6 +18,16 @@ func (m *Model) findById(id string) (model *Model, err error) {
 
 }
 
+// result can come without a name
+func (m *Model) save(model *Model) (err error) {
+
+}
+
+// result can come without a name
+func (m *Model) Update(model *Model, Id int64) (err error) {
+
+}
+
 // must not use *[]*Model
 func (m *Model) findByName(name string) (models []*Model, err error) {
 

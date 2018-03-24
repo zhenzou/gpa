@@ -28,7 +28,7 @@ type GormTransformer struct {
 
 func (g *GormTransformer) TransformCreate(create *CreateFunc) string {
 	tb := util.TableName(create.Table)
-	expr := fmt.Sprintf(CreateTemplate, GetDb, tb, create.Func.Params[0])
+	expr := fmt.Sprintf(CreateTemplate, GetDb, tb, create.Func.Params[0].Name)
 	_, decls := g.transformResult(create.Func.Receiver.Typ, create.Func.Results)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
 }
@@ -37,7 +37,7 @@ func (g *GormTransformer) TransformUpdate(update *UpdateFunc) string {
 	tb := util.TableName(update.Table)
 	// 第一个参数是更新的值，暂时不支持按字段更新
 	where := g.transformPredicates(update.Predicates, update.Func.Params[1:])
-	expr := fmt.Sprintf(UpdateTemplate, GetDb, tb, where, update.Func.Params[0])
+	expr := fmt.Sprintf(UpdateTemplate, GetDb, tb, where, update.Func.Params[0].Name)
 	_, decls := g.transformResult(update.Func.Receiver.Typ, update.Func.Results)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
 }

@@ -68,7 +68,7 @@ func (g *GpaParser) trimPrefix(fullName, prefix string) (string, error) {
 // NOTE 暂时只支持使用Receiver作为Table的这种格式吧
 // 参考：example
 func (g *GpaParser) ParseCreate(fd *Func) (create *CreateFunc, err error) {
-	create = &CreateFunc{Func: fd}
+	create = &CreateFunc{Func: fd, Table: fd.Receiver.Typ.TypeName}
 	if _, err = g.trimPrefix(fd.FullName, CreatePrefix); err != nil {
 		return
 	}
