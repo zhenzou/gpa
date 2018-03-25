@@ -1,3 +1,5 @@
+//go:generate gpa
+
 package example
 
 import "github.com/jinzhu/gorm"
