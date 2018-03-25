@@ -50,14 +50,14 @@ var (
 		FileName: "parser_test.go",
 		FullName: "DeleteById",
 		Params:   []*Field{{Name: "id", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}}},
-		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
+		Returns:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
 		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}},
 	}
 	func2 = &Func{
 		FileName: "parser_test.go",
 		FullName: "DeleteByName",
 		Params:   []*Field{{Name: "name", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}}},
-		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
+		Returns:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
 		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}},
 	}
 	func3 = &Func{
@@ -67,7 +67,7 @@ var (
 			{Name: "name", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}},
 			{Name: "lastName", IsPointer: false, Typ: Type{TypeName: "string", IsPointer: false}},
 		},
-		Results:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
+		Returns:  []*Field{{Name: "model", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}}},
 		Receiver: &Field{Name: "m", IsPointer: false, Typ: Type{TypeName: "Model", IsPointer: true}},
 	}
 

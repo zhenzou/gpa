@@ -1,7 +1,6 @@
 package gen
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -9,18 +8,20 @@ import (
 )
 
 const (
-	GetDb          = "GetDb()"
-	ErrorDecl      = "var err error"
-	ModelDecl      = `%s%s%s{}`
-	ModelSliceDecl = `%s%s[]%s{}`
-	CreateTemplate = `err=%s.Table("%s").Create(%s).Error`
-	UpdateTemplate = `err=%s.Table("%s").Where(%s).Update(%s).Error`
-	DeleteTemplate = `err=%s.Table("%s").Delete(%s).Error`
-	FindTemplate   = `err=%s.Table("%s")%s.Find(&%s,%s).Error`
-	PageTemplate   = `.Offset(offset).Limit(limit)`
-	ReturnErr      = "return err"
-	ReturnModel    = "return %s,err"
-	StmtTemplate   = "%s\n%s\n%s"
+	GetDb             = "GetDb()"
+	ErrorDecl         = "var err error"
+	ModelDecl         = `%s%s%s{}`
+	ModelSliceDecl    = `%s%s[]%s{}`
+	CreateTemplate    = `err=%s.Table("%s").Create(%s).Error`
+	UpdateTemplate    = `err=%s.Table("%s").Where(%s).Update(%s).Error`
+	UpdateAllTemplate = `err=%s.Table("%s").Update(%s).Error`
+	DeleteTemplate    = `err=%s.Table("%s").Where(%s).Delete(nil).Error`
+	DeleteAllTemplate = `err=%s.Table("%s").Delete(nil).Error`
+	FindTemplate      = `err=%s.Table("%s")%s.Find(&%s,%s).Error`
+	PageTemplate      = `.Offset(offset).Limit(limit)`
+	ReturnErr         = "return err"
+	ReturnModel       = "return %s,err"
+	StmtTemplate      = "%s\n%s\n%s"
 )
 
 type GormTransformer struct {
@@ -29,26 +30,33 @@ type GormTransformer struct {
 func (g *GormTransformer) TransformCreate(create *CreateFunc) string {
 	tb := util.TableName(create.Table)
 	expr := fmt.Sprintf(CreateTemplate, GetDb, tb, create.Func.Params[0].Name)
-	_, decls := g.transformResult(create.Func.Receiver.Typ, create.Func.Results)
+	_, decls := g.transformResult(create.Func.Receiver.Typ, create.Func.Returns)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
 }
 
 func (g *GormTransformer) TransformUpdate(update *UpdateFunc) string {
 	tb := util.TableName(update.Table)
-	// 第一个参数是更新的值，暂时不支持按字段更新
-	where := g.transformPredicates(update.Predicates, update.Func.Params[1:])
-	expr := fmt.Sprintf(UpdateTemplate, GetDb, tb, where, update.Func.Params[0].Name)
-	_, decls := g.transformResult(update.Func.Receiver.Typ, update.Func.Results)
+	var expr string
+	if len(update.Predicates) == 0 {
+		expr = fmt.Sprintf(UpdateAllTemplate, GetDb, tb, update.Func.Params[0].Name)
+	} else {
+		// 第一个参数是更新的值，暂时不支持按字段更新
+		where := g.transformPredicates(update.Predicates, update.Func.Params[1:])
+		expr = fmt.Sprintf(UpdateTemplate, GetDb, tb, where, update.Func.Params[0].Name)
+	}
+	_, decls := g.transformResult(update.Func.Receiver.Typ, update.Func.Returns)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
 }
 
-func (g *GormTransformer) writeBuf(buf *bytes.Buffer, str string) *bytes.Buffer {
+func (g *GormTransformer) writeBuf(buf *strings.Builder, str string) *strings.Builder {
 	buf.WriteString(str + " ")
 	return buf
 }
 
 func (g *GormTransformer) transformPredicates(predicates []*Predicate, params []*Field) string {
-	buf := bytes.NewBufferString(`"`)
+
+	buf := &strings.Builder{}
+	buf.WriteString(`"`)
 	for i, p := range predicates {
 		col := util.TableName(p.Field)
 		g.writeBuf(buf, strings.ToUpper(p.Logic))
@@ -155,7 +163,7 @@ func (g *GormTransformer) TransformFind(find *FindFunc) string {
 		}
 	}
 	where := g.transformPredicates(find.Predicates, find.Func.Params[:end])
-	name, decls := g.transformResult(find.Func.Receiver.Typ, find.Func.Results)
+	name, decls := g.transformResult(find.Func.Receiver.Typ, find.Func.Returns)
 	expr := fmt.Sprintf(FindTemplate, GetDb, tb, page, name, where)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, fmt.Sprintf(ReturnModel, name))
 }
@@ -173,21 +181,21 @@ func (g *GormTransformer) checkPage(fields []*Field) bool {
 // 暂时只支持（model，error）或者（error）这种吧，其他的没啥必要了，这样也简单
 // return modelName,声明列表
 // TODO 重构
-func (g *GormTransformer) transformResult(recv Type, result []*Field) (string, []string) {
+func (g *GormTransformer) transformResult(recv Type, returns []*Field) (string, []string) {
 	var decls []string
 	var modelName string
-	if len(result) == 0 {
+	if len(returns) == 0 {
 		decls = append(decls, ErrorDecl)
-	} else if len(result) == 1 && result[0].Typ.TypeName == "error" {
-		decls = append(decls, g.transformError(result[0]))
-	} else if len(result) == 2 {
-		field1 := result[0]
+	} else if len(returns) == 1 && returns[0].Typ.TypeName == "error" {
+		decls = append(decls, g.transformError(returns[0]))
+	} else if len(returns) == 2 {
+		field1 := returns[0]
 		if field1.Typ.TypeName == recv.TypeName {
 			var decl string
 			modelName, decl = g.transformModel(field1)
 			decls = append(decls, decl)
 		}
-		decls = append(decls, g.transformError(result[1]))
+		decls = append(decls, g.transformError(returns[1]))
 	}
 	return modelName, decls
 }
@@ -231,8 +239,14 @@ func (g *GormTransformer) transformModel(field *Field) (string, string) {
 
 func (g *GormTransformer) TransformDelete(delete *DeleteFunc) string {
 	tb := util.TableName(delete.Table)
-	where := g.transformPredicates(delete.Predicates, delete.Func.Params)
-	_, decls := g.transformResult(delete.Func.Receiver.Typ, delete.Func.Results)
-	expr := fmt.Sprintf(DeleteTemplate, GetDb, tb, where)
+	var expr string
+	if len(delete.Predicates) == 0 {
+		expr = fmt.Sprintf(DeleteAllTemplate, GetDb, tb)
+	} else {
+		// 第一个参数是更新的值，暂时不支持按字段更新
+		where := g.transformPredicates(delete.Predicates, delete.Func.Params)
+		expr = fmt.Sprintf(DeleteTemplate, GetDb, tb, where)
+	}
+	_, decls := g.transformResult(delete.Func.Receiver.Typ, delete.Func.Returns)
 	return fmt.Sprintf(StmtTemplate, strings.Join(decls, "\n"), expr, ReturnErr)
 }

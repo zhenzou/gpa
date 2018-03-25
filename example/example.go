@@ -28,6 +28,11 @@ func (m *Model) Update(model *Model, Id int64) (err error) {
 
 }
 
+// result can come without a name
+func (m *Model) UpdateById(model *Model, Id int64) (err error) {
+
+}
+
 // must not use *[]*Model
 func (m *Model) findByName(name string) (models []*Model, err error) {
 

@@ -134,7 +134,7 @@ func (g *Gpa) extractFunc(data []byte, decl *ast.FuncDecl) *Func {
 	f := &Func{
 		FullName: fn,
 		Params:   params,
-		Results:  results,
+		Returns:  results,
 	}
 
 	if decl.Recv != nil {

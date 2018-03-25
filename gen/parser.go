@@ -38,7 +38,7 @@ type Func struct {
 	FileName string
 	FullName string
 	Params   []*Field
-	Results  []*Field
+	Returns  []*Field
 	Receiver *Field
 }
 
@@ -85,6 +85,7 @@ func (g *GpaParser) ParseDelete(fd *Func) (delete *DeleteFunc, err error) {
 	}
 	if fullName == "" {
 		log.Warnf("delete without predicate in %s:%s", fd.FileName, fd.FullName)
+		delete = &DeleteFunc{Func: fd, Table: fd.Receiver.Typ.TypeName}
 	} else {
 		if strings.HasPrefix(fullName, By) {
 			fn := strings.TrimPrefix(fullName, By)
@@ -180,6 +181,7 @@ func (g *GpaParser) ParseUpdate(fd *Func) (update *UpdateFunc, err error) {
 	}
 	if fullName == "" {
 		log.Warnf("update without predicate in %s:%s", fd.FileName, fd.FullName)
+		update = &UpdateFunc{Func: fd, Table: fd.Receiver.Typ.TypeName}
 	} else {
 		if strings.HasPrefix(fullName, By) {
 			fn := strings.TrimPrefix(fullName, By)
