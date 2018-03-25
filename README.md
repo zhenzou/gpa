@@ -1,4 +1,4 @@
-## intro
+## Gpa
 gpa is a experimental,spring-data-jpa like code generator for GO.
 For now,it is only impl little feature.
 
