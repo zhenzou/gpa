@@ -18,7 +18,18 @@ func init() {
 	flag.Parse()
 }
 
+func goGenerate(fp string) {
+	gpa := gen.NewRewriteGpa(gen.NewGenerator(&gen.GormTransformer{}, &gen.GpaParser{}))
+	gpa.Process(fp)
+}
+
 func main() {
+	// 支持go generate
+	if fp := os.Getenv("GOFILE"); fp != "" {
+		goGenerate(fp)
+		return
+	}
+
 	var gpa *gen.Gpa
 	if debug {
 		gpa = gen.NewDebugGpa(gen.NewGenerator(&gen.GormTransformer{}, &gen.GpaParser{}))
@@ -26,10 +37,6 @@ func main() {
 		gpa = gen.NewRewriteGpa(gen.NewGenerator(&gen.GormTransformer{}, &gen.GpaParser{}))
 	}
 	args := flag.Args()
-	// 支持go generate
-	if fp := os.Getenv("GOFILE"); fp != "" {
-		gpa.Process(fp)
-	}
 	for _, filename := range args {
 		log.Debug(filename)
 		gpa.Process(filename)

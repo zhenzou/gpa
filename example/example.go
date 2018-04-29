@@ -2,7 +2,9 @@
 
 package example
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+)
 
 // example to guide impl :)
 type Model struct {
